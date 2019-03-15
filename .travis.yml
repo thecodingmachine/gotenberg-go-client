@@ -1,0 +1,16 @@
+sudo: required
+
+language: generic
+
+services:
+  - docker
+
+stages:
+  - tests
+
+jobs:
+  include:
+    - stage: tests
+      script: make lint
+    - stage: tests
+      script: make tests
