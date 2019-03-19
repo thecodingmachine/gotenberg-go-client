@@ -17,7 +17,22 @@ func TestURL(t *testing.T) {
 	require.Nil(t, err)
 	err = req.SetFooter(test.URLTestFilePath(t, "footer.html"))
 	require.Nil(t, err)
+	req.SetPaperSize(A4)
+	req.SetMargins(NormalMargins)
+	req.SetLandscape(false)
+	dirPath, err := test.Rand()
 	require.Nil(t, err)
+	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
+	err = c.Store(req, dest)
+	assert.Nil(t, err)
+	assert.FileExists(t, dest)
+	err = os.RemoveAll(dirPath)
+	assert.Nil(t, err)
+}
+
+func TestURLWithoutHeaderFooter(t *testing.T) {
+	c := &Client{Hostname: "http://localhost:3000"}
+	req := NewURLRequest("http://google.com")
 	req.SetPaperSize(A4)
 	req.SetMargins(NormalMargins)
 	req.SetLandscape(false)

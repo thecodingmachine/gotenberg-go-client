@@ -42,6 +42,28 @@ func TestMarkdown(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestMarkdownWithoutHeaderFooter(t *testing.T) {
+	c := &Client{Hostname: "http://localhost:3000"}
+	req, err := NewMarkdownRequest(
+		test.MarkdownTestFilePath(t, "index.html"),
+		test.MarkdownTestFilePath(t, "paragraph1.md"),
+		test.MarkdownTestFilePath(t, "paragraph2.md"),
+		test.MarkdownTestFilePath(t, "paragraph3.md"),
+	)
+	require.Nil(t, err)
+	req.SetPaperSize(A4)
+	req.SetMargins(NormalMargins)
+	req.SetLandscape(false)
+	dirPath, err := test.Rand()
+	require.Nil(t, err)
+	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
+	err = c.Store(req, dest)
+	assert.Nil(t, err)
+	assert.FileExists(t, dest)
+	err = os.RemoveAll(dirPath)
+	assert.Nil(t, err)
+}
+
 func TestConcurrentMarkdown(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		go func() {

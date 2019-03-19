@@ -37,6 +37,23 @@ func TestHTML(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestHTMLWithoutHeaderFooter(t *testing.T) {
+	c := &Client{Hostname: "http://localhost:3000"}
+	req, err := NewHTMLRequest(test.HTMLTestFilePath(t, "index.html"))
+	require.Nil(t, err)
+	req.SetPaperSize(A4)
+	req.SetMargins(NormalMargins)
+	req.SetLandscape(false)
+	dirPath, err := test.Rand()
+	require.Nil(t, err)
+	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
+	err = c.Store(req, dest)
+	assert.Nil(t, err)
+	assert.FileExists(t, dest)
+	err = os.RemoveAll(dirPath)
+	assert.Nil(t, err)
+}
+
 func TestConcurrentHTML(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		go func() {

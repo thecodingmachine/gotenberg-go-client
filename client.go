@@ -151,6 +151,10 @@ func multipartForm(req Request) (*bytes.Buffer, string, error) {
 	writer := multipart.NewWriter(body)
 	defer writer.Close()
 	for filename, fpath := range req.getFormFiles() {
+		// https://github.com/thecodingmachine/gotenberg-go-client/issues/3
+		if fpath == "" {
+			continue
+		}
 		in, err := os.Open(fpath)
 		if err != nil {
 			return nil, "", fmt.Errorf("%s: opening file: %v", filename, err)
