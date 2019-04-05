@@ -110,6 +110,10 @@ func (c *Client) Store(req Request, dest string) error {
 	if err != nil {
 		return err
 	}
+	// Check for 2XX Status Codes
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return errors.New("cannot convert file to PDF")
+	}
 	return writeNewFile(dest, resp.Body)
 }
 
