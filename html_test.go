@@ -7,26 +7,29 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/thecodingmachine/gotenberg-go-client/v4/test"
+	"github.com/thecodingmachine/gotenberg-go-client/v5/test"
 )
 
 func TestHTML(t *testing.T) {
 	c := &Client{Hostname: "http://localhost:3000"}
 	req, err := NewHTMLRequest(test.HTMLTestFilePath(t, "index.html"))
 	require.Nil(t, err)
-	err = req.SetHeader(test.HTMLTestFilePath(t, "header.html"))
+	req.ResultFilename("foo.pdf")
+	req.WaitTimeout(5)
+	req.WaitDelay(1)
+	err = req.Header(test.HTMLTestFilePath(t, "header.html"))
 	require.Nil(t, err)
-	err = req.SetFooter(test.HTMLTestFilePath(t, "footer.html"))
+	err = req.Footer(test.HTMLTestFilePath(t, "footer.html"))
 	require.Nil(t, err)
-	err = req.SetAssets(
+	err = req.Assets(
 		test.HTMLTestFilePath(t, "font.woff"),
 		test.HTMLTestFilePath(t, "img.gif"),
 		test.HTMLTestFilePath(t, "style.css"),
 	)
 	require.Nil(t, err)
-	req.SetPaperSize(A4)
-	req.SetMargins(NormalMargins)
-	req.SetLandscape(false)
+	req.PaperSize(A4)
+	req.Margins(NormalMargins)
+	req.Landscape(false)
 	dirPath, err := test.Rand()
 	require.Nil(t, err)
 	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
@@ -41,9 +44,9 @@ func TestHTMLWithoutHeaderFooter(t *testing.T) {
 	c := &Client{Hostname: "http://localhost:3000"}
 	req, err := NewHTMLRequest(test.HTMLTestFilePath(t, "index.html"))
 	require.Nil(t, err)
-	req.SetPaperSize(A4)
-	req.SetMargins(NormalMargins)
-	req.SetLandscape(false)
+	req.PaperSize(A4)
+	req.Margins(NormalMargins)
+	req.Landscape(false)
 	dirPath, err := test.Rand()
 	require.Nil(t, err)
 	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
@@ -52,12 +55,4 @@ func TestHTMLWithoutHeaderFooter(t *testing.T) {
 	assert.FileExists(t, dest)
 	err = os.RemoveAll(dirPath)
 	assert.Nil(t, err)
-}
-
-func TestConcurrentHTML(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		go func() {
-			TestHTML(t)
-		}()
-	}
 }

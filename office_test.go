@@ -7,14 +7,16 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/thecodingmachine/gotenberg-go-client/v4/test"
+	"github.com/thecodingmachine/gotenberg-go-client/v5/test"
 )
 
 func TestOffice(t *testing.T) {
 	c := &Client{Hostname: "http://localhost:3000"}
 	req, err := NewOfficeRequest(test.OfficeTestFilePath(t, "document.docx"))
 	require.Nil(t, err)
-	req.SetLandscape(false)
+	req.ResultFilename("foo.pdf")
+	req.WaitTimeout(5)
+	req.Landscape(false)
 	dirPath, err := test.Rand()
 	require.Nil(t, err)
 	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
@@ -23,12 +25,4 @@ func TestOffice(t *testing.T) {
 	assert.FileExists(t, dest)
 	err = os.RemoveAll(dirPath)
 	assert.Nil(t, err)
-}
-
-func TestConcurrentOffice(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		go func() {
-			TestOffice(t)
-		}()
-	}
 }

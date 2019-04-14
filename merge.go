@@ -9,7 +9,8 @@ import (
 // with the Gotenberg API.
 type MergeRequest struct {
 	filePaths []string
-	values    map[string]string
+
+	*request
 }
 
 // NewMergeRequest create MergeRequest.
@@ -19,25 +20,16 @@ func NewMergeRequest(fpaths ...string) (*MergeRequest, error) {
 			return nil, fmt.Errorf("%s: file does not exist", fpath)
 		}
 	}
-	return &MergeRequest{filePaths: fpaths, values: make(map[string]string)}, nil
+	return &MergeRequest{fpaths, newRequest()}, nil
 }
 
-// SetWebhookURL sets webhookURL form field.
-func (merge *MergeRequest) SetWebhookURL(webhookURL string) {
-	merge.values[webhookURL] = webhookURL
+func (req *MergeRequest) postURL() string {
+	return "/convert/merge"
 }
 
-func (merge *MergeRequest) getPostURL() string {
-	return "/merge"
-}
-
-func (merge *MergeRequest) getFormValues() map[string]string {
-	return merge.values
-}
-
-func (merge *MergeRequest) getFormFiles() map[string]string {
+func (req *MergeRequest) formFiles() map[string]string {
 	files := make(map[string]string)
-	for _, fpath := range merge.filePaths {
+	for _, fpath := range req.filePaths {
 		files[filepath.Base(fpath)] = fpath
 	}
 	return files

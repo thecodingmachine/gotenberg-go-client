@@ -1,5 +1,5 @@
 GOLANG_VERSION=1.12
-GOTENBERG_VERSION=4.2.1
+GOTENBERG_VERSION=5.0.0
 VERSION=snapshot
 
 # gofmt and goimports all go files.

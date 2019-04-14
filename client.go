@@ -10,45 +10,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 )
 
 const (
-	remoteURL       string = "remoteURL"
-	webhookURL      string = "webhookURL"
-	paperWidth      string = "paperWidth"
-	paperHeight     string = "paperHeight"
-	marginTop       string = "marginTop"
-	marginBottom    string = "marginBottom"
-	marginLeft      string = "marginLeft"
-	marginRight     string = "marginRight"
-	landscape       string = "landscape"
-	webFontsTimeout string = "webFontsTimeout"
-)
-
-var (
-	// A3 paper size.
-	A3 = [2]float64{11.7, 16.5}
-	// A4 paper size.
-	A4 = [2]float64{8.27, 11.7}
-	// A5 paper size.
-	A5 = [2]float64{5.8, 8.3}
-	// A6 paper size.
-	A6 = [2]float64{4.1, 5.8}
-	// Letter paper size.
-	Letter = [2]float64{8.5, 11}
-	// Legal paper size.
-	Legal = [2]float64{8.5, 14}
-	// Tabloid paper size.
-	Tabloid = [2]float64{11, 17}
-)
-
-var (
-	// NoMargins removes margins.
-	NoMargins = [4]float64{0, 0, 0, 0}
-	// NormalMargins uses 1 inche margins.
-	NormalMargins = [4]float64{1, 1, 1, 1}
-	// LargeMargins uses 2 inche margins.
-	LargeMargins = [4]float64{2, 2, 2, 2}
+	resultFilename string = "resultFilename"
+	waitTimeout    string = "waitTimeout"
+	webhookURL     string = "webhookURL"
 )
 
 // Client facilitates interacting with
@@ -61,29 +29,38 @@ type Client struct {
 // form values and form files to
 // the Gotenberg API.
 type Request interface {
-	SetWebhookURL(webhookURL string)
-	getPostURL() string
-	getFormValues() map[string]string
-	getFormFiles() map[string]string
+	postURL() string
+	formValues() map[string]string
+	formFiles() map[string]string
 }
 
-// ChromeRequest is a type for sending
-// conversion requests which will be
-// handle by Google Chrome.
-type ChromeRequest interface {
-	SetHeader(fpath string) error
-	SetFooter(fpath string) error
-	SetPaperSize(size [2]float64)
-	SetMargins(margins [4]float64)
-	SetLandscape(isLandscape bool)
-	SetWebFontsTimeout(timeout int64)
+type request struct {
+	values map[string]string
 }
 
-// UnoconvRequest is a type for sending
-// conversion requests which will be
-// handle by unoconv.
-type UnoconvRequest interface {
-	SetLandscape(landscape bool)
+func newRequest() *request {
+	return &request{
+		values: make(map[string]string),
+	}
+}
+
+// ResultFilename sets resultFilename form field.
+func (req *request) ResultFilename(filename string) {
+	req.values[resultFilename] = filename
+}
+
+// WaitTiemout sets waitTimeout form field.
+func (req *request) WaitTimeout(timeout float64) {
+	req.values[waitTimeout] = strconv.FormatFloat(timeout, 'f', 2, 64)
+}
+
+// WebhookURL sets webhookURL form field.
+func (req *request) WebhookURL(url string) {
+	req.values[webhookURL] = url
+}
+
+func (req *request) formValues() map[string]string {
+	return req.values
 }
 
 // Post sends a request to the Gotenberg API
@@ -93,8 +70,8 @@ func (c *Client) Post(req Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	URL := fmt.Sprintf("%s%s", c.Hostname, req.getPostURL())
-	resp, err := http.Post(URL, contentType, body)
+	URL := fmt.Sprintf("%s%s", c.Hostname, req.postURL())
+	resp, err := http.Post(URL, contentType, body) /* #nosec */
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +91,7 @@ func (c *Client) Store(req Request, dest string) error {
 }
 
 func hasWebhook(req Request) bool {
-	webhookURL, ok := req.getFormValues()[webhookURL]
+	webhookURL, ok := req.formValues()[webhookURL]
 	if !ok {
 		return false
 	}
@@ -129,7 +106,7 @@ func writeNewFile(fpath string, in io.Reader) error {
 	if err != nil {
 		return fmt.Errorf("%s: creating new file: %v", fpath, err)
 	}
-	defer out.Close()
+	defer out.Close() // nolint: errcheck
 	err = out.Chmod(0644)
 	if err != nil && runtime.GOOS != "windows" {
 		return fmt.Errorf("%s: changing file mode: %v", fpath, err)
@@ -149,8 +126,8 @@ func fileExists(name string) bool {
 func multipartForm(req Request) (*bytes.Buffer, string, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	defer writer.Close()
-	for filename, fpath := range req.getFormFiles() {
+	defer writer.Close() // nolint: errcheck
+	for filename, fpath := range req.formFiles() {
 		// https://github.com/thecodingmachine/gotenberg-go-client/issues/3
 		if fpath == "" {
 			continue
@@ -159,6 +136,7 @@ func multipartForm(req Request) (*bytes.Buffer, string, error) {
 		if err != nil {
 			return nil, "", fmt.Errorf("%s: opening file: %v", filename, err)
 		}
+		defer in.Close() // nolint: errcheck
 		part, err := writer.CreateFormFile("files", filename)
 		if err != nil {
 			return nil, "", fmt.Errorf("%s: creating form file: %v", filename, err)
@@ -168,7 +146,7 @@ func multipartForm(req Request) (*bytes.Buffer, string, error) {
 			return nil, "", fmt.Errorf("%s: copying file: %v", filename, err)
 		}
 	}
-	for name, value := range req.getFormValues() {
+	for name, value := range req.formValues() {
 		if err := writer.WriteField(name, value); err != nil {
 			return nil, "", fmt.Errorf("%s: writing form field: %v", name, err)
 		}

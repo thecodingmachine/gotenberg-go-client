@@ -5,28 +5,28 @@ A simple Go client for interacting with a Gotenberg API.
 ## Install
 
 ```bash
-$ go get -u github.com/thecodingmachine/gotenberg-go-client/v4
+$ go get -u github.com/thecodingmachine/gotenberg-go-client/v5
 ```
 
 ## Usage
 
 ```golang
-import "github.com/thecodingmachine/gotenberg-go-client/v4"
+import "github.com/thecodingmachine/gotenberg-go-client/v5"
 
 func main() {
     // HTML conversion example.
     c := &gotenberg.Client{Hostname: "http://localhost:3000"}
     req, _ := gotenberg.NewHTMLRequest("index.html")
-    req.SetHeader("header.html")
-    req.SetFooter("footer.html")
-    req.SetAssets(
+    req.Header("header.html")
+    req.Footer("footer.html")
+    req.Assets(
         "font.woff",
         "img.gif",
         "style.css",
     )
-    req.SetPaperSize(gotenberg.A4)
-    req.SetMargins(gotenberg.NormalMargins)
-    req.SetLandscape(false)
+    req.PaperSize(gotenberg.A4)
+    req.Margins(gotenberg.NormalMargins)
+    req.Landscape(false)
     dest := "foo.pdf"
     c.Store(req, dest)
 }
