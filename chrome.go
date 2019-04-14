@@ -55,13 +55,6 @@ func newChromeRequest() *chromeRequest {
 	return &chromeRequest{"", "", newRequest()}
 }
 
-func (req *chromeRequest) formFiles() map[string]string {
-	files := make(map[string]string)
-	files["header.html"] = req.headerFilePath
-	files["footer.html"] = req.footerFilePath
-	return files
-}
-
 // WaitDelay sets waitDelay form field.
 func (req *chromeRequest) WaitDelay(delay float64) {
 	req.values[waitDelay] = strconv.FormatFloat(delay, 'f', 2, 64)
@@ -103,4 +96,11 @@ func (req *chromeRequest) Margins(margins [4]float64) {
 // Landscape sets landscape form field.
 func (req *chromeRequest) Landscape(isLandscape bool) {
 	req.values[landscapeChrome] = strconv.FormatBool(isLandscape)
+}
+
+func (req *chromeRequest) formFiles() map[string]string {
+	files := make(map[string]string)
+	files["header.html"] = req.headerFilePath
+	files["footer.html"] = req.footerFilePath
+	return files
 }

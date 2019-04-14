@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/thecodingmachine/gotenberg-go-client/v4/test"
+	"github.com/thecodingmachine/gotenberg-go-client/v5/test"
 )
 
 func TestURL(t *testing.T) {
