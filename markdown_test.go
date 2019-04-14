@@ -19,19 +19,22 @@ func TestMarkdown(t *testing.T) {
 		test.MarkdownTestFilePath(t, "paragraph3.md"),
 	)
 	require.Nil(t, err)
-	err = req.SetHeader(test.MarkdownTestFilePath(t, "header.html"))
+	req.ResultFilename("foo.pdf")
+	req.WaitTimeout(5)
+	req.WaitDelay(1)
+	err = req.Header(test.MarkdownTestFilePath(t, "header.html"))
 	require.Nil(t, err)
-	err = req.SetFooter(test.MarkdownTestFilePath(t, "footer.html"))
+	err = req.Footer(test.MarkdownTestFilePath(t, "footer.html"))
 	require.Nil(t, err)
-	err = req.SetAssets(
+	err = req.Assets(
 		test.MarkdownTestFilePath(t, "font.woff"),
 		test.MarkdownTestFilePath(t, "img.gif"),
 		test.MarkdownTestFilePath(t, "style.css"),
 	)
 	require.Nil(t, err)
-	req.SetPaperSize(A4)
-	req.SetMargins(NormalMargins)
-	req.SetLandscape(false)
+	req.PaperSize(A4)
+	req.Margins(NormalMargins)
+	req.Landscape(false)
 	dirPath, err := test.Rand()
 	require.Nil(t, err)
 	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
@@ -51,9 +54,9 @@ func TestMarkdownWithoutHeaderFooter(t *testing.T) {
 		test.MarkdownTestFilePath(t, "paragraph3.md"),
 	)
 	require.Nil(t, err)
-	req.SetPaperSize(A4)
-	req.SetMargins(NormalMargins)
-	req.SetLandscape(false)
+	req.PaperSize(A4)
+	req.Margins(NormalMargins)
+	req.Landscape(false)
 	dirPath, err := test.Rand()
 	require.Nil(t, err)
 	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
@@ -62,12 +65,4 @@ func TestMarkdownWithoutHeaderFooter(t *testing.T) {
 	assert.FileExists(t, dest)
 	err = os.RemoveAll(dirPath)
 	assert.Nil(t, err)
-}
-
-func TestConcurrentMarkdown(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		go func() {
-			TestMarkdown(t)
-		}()
-	}
 }

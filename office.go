@@ -6,11 +6,14 @@ import (
 	"strconv"
 )
 
+const landscapeOffice string = "landscape"
+
 // OfficeRequest facilitates Office documents
 // conversion with the Gotenberg API.
 type OfficeRequest struct {
 	filePaths []string
-	values    map[string]string
+
+	*request
 }
 
 // NewOfficeRequest create OfficeRequest.
@@ -20,30 +23,21 @@ func NewOfficeRequest(fpaths ...string) (*OfficeRequest, error) {
 			return nil, fmt.Errorf("%s: file does not exist", fpath)
 		}
 	}
-	return &OfficeRequest{filePaths: fpaths, values: make(map[string]string)}, nil
+	return &OfficeRequest{fpaths, newRequest()}, nil
 }
 
-// SetWebhookURL sets webhookURL form field.
-func (office *OfficeRequest) SetWebhookURL(webhookURL string) {
-	office.values[webhookURL] = webhookURL
+// Landscape sets landscape form field.
+func (req *OfficeRequest) Landscape(isLandscape bool) {
+	req.values[landscapeOffice] = strconv.FormatBool(isLandscape)
 }
 
-// SetLandscape sets landscape form field.
-func (office *OfficeRequest) SetLandscape(isLandscape bool) {
-	office.values[landscape] = strconv.FormatBool(isLandscape)
-}
-
-func (office *OfficeRequest) getPostURL() string {
+func (req *OfficeRequest) postURL() string {
 	return "/convert/office"
 }
 
-func (office *OfficeRequest) getFormValues() map[string]string {
-	return office.values
-}
-
-func (office *OfficeRequest) getFormFiles() map[string]string {
+func (req *OfficeRequest) formFiles() map[string]string {
 	files := make(map[string]string)
-	for _, fpath := range office.filePaths {
+	for _, fpath := range req.filePaths {
 		files[filepath.Base(fpath)] = fpath
 	}
 	return files
@@ -52,5 +46,4 @@ func (office *OfficeRequest) getFormFiles() map[string]string {
 // Compile-time checks to ensure type implements desired interfaces.
 var (
 	_ = Request(new(OfficeRequest))
-	_ = UnoconvRequest(new(OfficeRequest))
 )

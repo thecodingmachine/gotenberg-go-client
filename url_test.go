@@ -13,13 +13,16 @@ import (
 func TestURL(t *testing.T) {
 	c := &Client{Hostname: "http://localhost:3000"}
 	req := NewURLRequest("http://google.com")
-	err := req.SetHeader(test.URLTestFilePath(t, "header.html"))
+	req.ResultFilename("foo.pdf")
+	req.WaitTimeout(5)
+	req.WaitDelay(1)
+	err := req.Header(test.URLTestFilePath(t, "header.html"))
 	require.Nil(t, err)
-	err = req.SetFooter(test.URLTestFilePath(t, "footer.html"))
+	err = req.Footer(test.URLTestFilePath(t, "footer.html"))
 	require.Nil(t, err)
-	req.SetPaperSize(A4)
-	req.SetMargins(NormalMargins)
-	req.SetLandscape(false)
+	req.PaperSize(A4)
+	req.Margins(NormalMargins)
+	req.Landscape(false)
 	dirPath, err := test.Rand()
 	require.Nil(t, err)
 	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
@@ -33,9 +36,9 @@ func TestURL(t *testing.T) {
 func TestURLWithoutHeaderFooter(t *testing.T) {
 	c := &Client{Hostname: "http://localhost:3000"}
 	req := NewURLRequest("http://google.com")
-	req.SetPaperSize(A4)
-	req.SetMargins(NormalMargins)
-	req.SetLandscape(false)
+	req.PaperSize(A4)
+	req.Margins(NormalMargins)
+	req.Landscape(false)
 	dirPath, err := test.Rand()
 	require.Nil(t, err)
 	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
@@ -44,12 +47,4 @@ func TestURLWithoutHeaderFooter(t *testing.T) {
 	assert.FileExists(t, dest)
 	err = os.RemoveAll(dirPath)
 	assert.Nil(t, err)
-}
-
-func TestConcurrentURL(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		go func() {
-			TestURL(t)
-		}()
-	}
 }
