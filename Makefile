@@ -1,6 +1,7 @@
 GOLANG_VERSION=1.12
-GOTENBERG_VERSION=5.0.0
+GOTENBERG_VERSION=6.0.0
 VERSION=snapshot
+GOLANGCI_LINT_VERSION=1.17.1
 
 # gofmt and goimports all go files.
 fmt:
@@ -9,7 +10,7 @@ fmt:
 
 # run all linters.
 lint:
-	docker build --build-arg GOLANG_VERSION=$(GOLANG_VERSION) -t thecodingmachine/gotenberg-go-client:lint -f build/lint/Dockerfile .
+	docker build --build-arg GOLANG_VERSION=$(GOLANG_VERSION) --build-arg GOLANGCI_LINT_VERSION=$(GOLANGCI_LINT_VERSION) -t thecodingmachine/gotenberg-go-client:lint -f build/lint/Dockerfile .
 	docker run --rm -it -v "$(PWD):/lint" thecodingmachine/gotenberg-go-client:lint
 
 # run all tests.

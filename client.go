@@ -14,9 +14,10 @@ import (
 )
 
 const (
-	resultFilename string = "resultFilename"
-	waitTimeout    string = "waitTimeout"
-	webhookURL     string = "webhookURL"
+	resultFilename    string = "resultFilename"
+	waitTimeout       string = "waitTimeout"
+	webhookURL        string = "webhookURL"
+	webhookURLTimeout string = "webhookURLTimeout"
 )
 
 // Client facilitates interacting with
@@ -59,6 +60,11 @@ func (req *request) WebhookURL(url string) {
 	req.values[webhookURL] = url
 }
 
+// WebhookURL sets WebhookURLTimeout form field.
+func (req *request) WebhookURLTimeout(timeout float64) {
+	req.values[webhookURLTimeout] = strconv.FormatFloat(timeout, 'f', 2, 64)
+}
+
 func (req *request) formValues() map[string]string {
 	return req.values
 }
@@ -87,6 +93,7 @@ func (c *Client) Store(req Request, dest string) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	return writeNewFile(dest, resp.Body)
 }
 

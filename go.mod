@@ -1,4 +1,4 @@
-module github.com/thecodingmachine/gotenberg-go-client/v5
+module github.com/thecodingmachine/gotenberg-go-client/v6
 
 go 1.12
 

@@ -24,7 +24,7 @@ func NewMergeRequest(fpaths ...string) (*MergeRequest, error) {
 }
 
 func (req *MergeRequest) postURL() string {
-	return "/convert/merge"
+	return "/merge"
 }
 
 func (req *MergeRequest) formFiles() map[string]string {
