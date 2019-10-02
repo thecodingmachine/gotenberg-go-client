@@ -60,7 +60,7 @@ func (req *request) WebhookURL(url string) {
 	req.values[webhookURL] = url
 }
 
-// WebhookURL sets WebhookURLTimeout form field.
+// WebhookURLTimeout sets webhookURLTimeout form field.
 func (req *request) WebhookURLTimeout(timeout float64) {
 	req.values[webhookURLTimeout] = strconv.FormatFloat(timeout, 'f', 2, 64)
 }
