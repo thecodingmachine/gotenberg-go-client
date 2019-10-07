@@ -6,14 +6,15 @@ import (
 )
 
 const (
-	waitDelay       string = "waitDelay"
-	paperWidth      string = "paperWidth"
-	paperHeight     string = "paperHeight"
-	marginTop       string = "marginTop"
-	marginBottom    string = "marginBottom"
-	marginLeft      string = "marginLeft"
-	marginRight     string = "marginRight"
-	landscapeChrome string = "landscape"
+	waitDelay                  string = "waitDelay"
+	paperWidth                 string = "paperWidth"
+	paperHeight                string = "paperHeight"
+	marginTop                  string = "marginTop"
+	marginBottom               string = "marginBottom"
+	marginLeft                 string = "marginLeft"
+	marginRight                string = "marginRight"
+	landscapeChrome            string = "landscape"
+	googleChromeRpccBufferSize string = "googleChromeRpccBufferSize"
 )
 
 // nolint: gochecknoglobals
@@ -96,6 +97,11 @@ func (req *chromeRequest) Margins(margins [4]float64) {
 // Landscape sets landscape form field.
 func (req *chromeRequest) Landscape(isLandscape bool) {
 	req.values[landscapeChrome] = strconv.FormatBool(isLandscape)
+}
+
+// GoogleChromeRpccBufferSize sets googleChromeRpccBufferSize form field.
+func (req *chromeRequest) GoogleChromeRpccBufferSize(bufferSize int64) {
+	req.values[googleChromeRpccBufferSize] = strconv.FormatInt(bufferSize, 10)
 }
 
 func (req *chromeRequest) formFiles() map[string]string {
