@@ -5,6 +5,8 @@ FROM golang:${GOLANG_VERSION}-stretch AS golang
 
 FROM thecodingmachine/gotenberg:${GOTENBERG_VERSION}
 
+USER root
+
 # |--------------------------------------------------------------------------
 # | Common libraries
 # |--------------------------------------------------------------------------

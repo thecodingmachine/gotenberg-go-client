@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/thecodingmachine/gotenberg-go-client/v4/test"
+	"github.com/thecodingmachine/gotenberg-go-client/v6/test"
 )
 
 func TestMerge(t *testing.T) {
@@ -17,6 +17,8 @@ func TestMerge(t *testing.T) {
 		test.PDFTestFilePath(t, "gotenberg.pdf"),
 	)
 	require.Nil(t, err)
+	req.ResultFilename("foo.pdf")
+	req.WaitTimeout(5)
 	dirPath, err := test.Rand()
 	require.Nil(t, err)
 	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
@@ -25,12 +27,4 @@ func TestMerge(t *testing.T) {
 	assert.FileExists(t, dest)
 	err = os.RemoveAll(dirPath)
 	assert.Nil(t, err)
-}
-
-func TestConcurrentMerge(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		go func() {
-			TestMerge(t)
-		}()
-	}
 }
