@@ -95,7 +95,7 @@ func (c *Client) Store(req Request, dest string) error {
 	}
 	defer resp.Body.Close()
 
-  // Check for 2XX Status Codes
+	// Check for 2XX Status Codes
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return errors.New("failed to generate the result PDF")
 	}
