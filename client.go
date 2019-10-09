@@ -94,6 +94,10 @@ func (c *Client) Store(req Request, dest string) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("failed to generate the result PDF")
+	}
 	return writeNewFile(dest, resp.Body)
 }
 
