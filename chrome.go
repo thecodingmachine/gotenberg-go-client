@@ -49,11 +49,14 @@ type chromeRequest struct {
 	headerFilePath string
 	footerFilePath string
 
+	headerData string
+	footerData string
+
 	*request
 }
 
 func newChromeRequest() *chromeRequest {
-	return &chromeRequest{"", "", newRequest()}
+	return &chromeRequest{"", "", "", "", newRequest()}
 }
 
 // WaitDelay sets waitDelay form field.
@@ -67,6 +70,22 @@ func (req *chromeRequest) Header(fpath string) error {
 		return fmt.Errorf("%s: header file does not exist", fpath)
 	}
 	req.headerFilePath = fpath
+	return nil
+}
+
+func (req *chromeRequest) HeaderRaw(headerData string) error {
+	if len(headerData) == 0 {
+		return fmt.Errorf("header content is empty does not exist")
+	}
+	req.headerData = headerData
+	return nil
+}
+
+func (req *chromeRequest) FooterRaw(footerData string) error {
+	if len(footerData) == 0 {
+		return fmt.Errorf("footer content is empty does not exist")
+	}
+	req.footerData = footerData
 	return nil
 }
 
@@ -108,5 +127,10 @@ func (req *chromeRequest) formFiles() map[string]string {
 	files := make(map[string]string)
 	files["header.html"] = req.headerFilePath
 	files["footer.html"] = req.footerFilePath
+	return files
+}
+
+func (req *chromeRequest) formData() map[string]string {
+	files := make(map[string]string)
 	return files
 }

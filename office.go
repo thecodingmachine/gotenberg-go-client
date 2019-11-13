@@ -43,6 +43,12 @@ func (req *OfficeRequest) formFiles() map[string]string {
 	return files
 }
 
+func (req *OfficeRequest) formData() map[string]string {
+	files := make(map[string]string)
+
+	return files
+}
+
 // Compile-time checks to ensure type implements desired interfaces.
 var (
 	_ = Request(new(OfficeRequest))

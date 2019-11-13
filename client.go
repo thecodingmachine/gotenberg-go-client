@@ -5,12 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -33,6 +35,7 @@ type Request interface {
 	postURL() string
 	formValues() map[string]string
 	formFiles() map[string]string
+	formData() map[string]string
 }
 
 type request struct {
@@ -73,6 +76,7 @@ func (req *request) formValues() map[string]string {
 // and returns the response.
 func (c *Client) Post(req Request) (*http.Response, error) {
 	body, contentType, err := multipartForm(req)
+
 	if err != nil {
 		return nil, err
 	}
@@ -99,6 +103,30 @@ func (c *Client) Store(req Request, dest string) error {
 		return errors.New("failed to generate the result PDF")
 	}
 	return writeNewFile(dest, resp.Body)
+}
+
+// GetBytes gets the PDF byte data as a byte array.
+func (c *Client) GetBytes(req Request) ([]byte, error) {
+	if hasWebhook(req) {
+		return nil, errors.New("cannot use Store method with a webhook")
+	}
+	resp, err := c.Post(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("failed to generate the result PDF")
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		return nil, fmt.Errorf("err reading response body: %v", err)
+	}
+
+	return body, nil
 }
 
 func hasWebhook(req Request) bool {
@@ -138,6 +166,7 @@ func multipartForm(req Request) (*bytes.Buffer, string, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	defer writer.Close() // nolint: errcheck
+
 	for filename, fpath := range req.formFiles() {
 		// https://github.com/thecodingmachine/gotenberg-go-client/issues/3
 		if fpath == "" {
@@ -157,6 +186,27 @@ func multipartForm(req Request) (*bytes.Buffer, string, error) {
 			return nil, "", fmt.Errorf("%s: copying file: %v", filename, err)
 		}
 	}
+
+	for filename, fdata := range req.formData() {
+		if fdata == "" {
+			continue
+		}
+		//check if file path already exists
+		fpath := req.formFiles()[filename]
+		if fpath == "" {
+			in := strings.NewReader(fdata)
+
+			part, err := writer.CreateFormFile("files", filename)
+			if err != nil {
+				return nil, "", fmt.Errorf("%s: creating form file: %v", filename, err)
+			}
+			_, err = io.Copy(part, in)
+			if err != nil {
+				return nil, "", fmt.Errorf("%s: copying file: %v", filename, err)
+			}
+		}
+	}
+
 	for name, value := range req.formValues() {
 		if err := writer.WriteField(name, value); err != nil {
 			return nil, "", fmt.Errorf("%s: writing form field: %v", name, err)

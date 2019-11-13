@@ -5,21 +5,34 @@ import (
 	"path/filepath"
 )
 
+const (
+	//PathOption is used to denote that index.html is from path
+	PathOption string = "path"
+	//RawHTMLOption is used to denote that index.html is a raw string
+	RawHTMLOption string = "raw"
+)
+
 // HTMLRequest facilitates HTML conversion
 // with the Gotenberg API.
 type HTMLRequest struct {
 	indexFilePath  string
 	assetFilePaths []string
-
 	*chromeRequest
+	indexFileData string
 }
 
 // NewHTMLRequest create HTMLRequest.
-func NewHTMLRequest(indexFilePath string) (*HTMLRequest, error) {
-	if !fileExists(indexFilePath) {
-		return nil, fmt.Errorf("%s: index file does not exist", indexFilePath)
+func NewHTMLRequest(fileInfo string, filePass string) (*HTMLRequest, error) {
+	if filePass == "path" {
+		if !fileExists(fileInfo) {
+			return nil, fmt.Errorf("%s: index file does not exist", fileInfo)
+		}
+		return &HTMLRequest{fileInfo, nil, newChromeRequest(), ""}, nil
 	}
-	return &HTMLRequest{indexFilePath, nil, newChromeRequest()}, nil
+	if len(fileInfo) == 0 {
+		return nil, fmt.Errorf("index data is empty")
+	}
+	return &HTMLRequest{"", nil, newChromeRequest(), fileInfo}, nil
 }
 
 // Assets sets assets form files.
@@ -45,6 +58,15 @@ func (req *HTMLRequest) formFiles() map[string]string {
 	for _, fpath := range req.assetFilePaths {
 		files[filepath.Base(fpath)] = fpath
 	}
+	return files
+}
+
+func (req *HTMLRequest) formData() map[string]string {
+	files := make(map[string]string)
+	files["index.html"] = req.indexFileData
+	files["header.html"] = req.headerData
+	files["footer.html"] = req.footerData
+
 	return files
 }
 

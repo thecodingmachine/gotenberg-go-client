@@ -35,6 +35,12 @@ func (req *MergeRequest) formFiles() map[string]string {
 	return files
 }
 
+func (req *MergeRequest) formData() map[string]string {
+	files := make(map[string]string)
+
+	return files
+}
+
 // Compile-time checks to ensure type implements desired interfaces.
 var (
 	_ = Request(new(MergeRequest))

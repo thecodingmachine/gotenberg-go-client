@@ -57,6 +57,11 @@ func (req *MarkdownRequest) formFiles() map[string]string {
 	return files
 }
 
+func (req *MarkdownRequest) formData() map[string]string {
+	files := make(map[string]string)
+	return files
+}
+
 // Compile-time checks to ensure type implements desired interfaces.
 var (
 	_ = Request(new(MarkdownRequest))
