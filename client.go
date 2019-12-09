@@ -23,7 +23,8 @@ const (
 // Client facilitates interacting with
 // the Gotenberg API.
 type Client struct {
-	Hostname string
+	Hostname   string
+	HTTPClient *http.Client
 }
 
 // Request is a type for sending
@@ -76,8 +77,11 @@ func (c *Client) Post(req Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+	if c.HTTPClient == nil {
+		c.HTTPClient = &http.Client{}
+	}
 	URL := fmt.Sprintf("%s%s", c.Hostname, req.postURL())
-	resp, err := http.Post(URL, contentType, body) /* #nosec */
+	resp, err := c.HTTPClient.Post(URL, contentType, body) /* #nosec */
 	if err != nil {
 		return nil, err
 	}
