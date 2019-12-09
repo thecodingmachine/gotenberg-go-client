@@ -16,6 +16,7 @@ func TestURL(t *testing.T) {
 	req.ResultFilename("foo.pdf")
 	req.WaitTimeout(5)
 	req.WaitDelay(1)
+	req.AddRemoteURLHTTPHeader("A-Header", "Foo")
 	err := req.Header(test.URLTestFilePath(t, "header.html"))
 	require.Nil(t, err)
 	err = req.Footer(test.URLTestFilePath(t, "footer.html"))
@@ -49,4 +50,15 @@ func TestURLWithoutHeaderFooter(t *testing.T) {
 	assert.FileExists(t, dest)
 	err = os.RemoveAll(dirPath)
 	assert.Nil(t, err)
+}
+
+func TestURLWebhook(t *testing.T) {
+	c := &Client{Hostname: "http://localhost:3000"}
+	req := NewURLRequest("http://google.com")
+	req.WebhookURL("https://google.com")
+	req.WebhookURLTimeout(5.0)
+	req.AddWebhookURLHTTPHeader("A-Header", "Foo")
+	resp, err := c.Post(req)
+	assert.Nil(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
 }

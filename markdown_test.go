@@ -68,3 +68,20 @@ func TestMarkdownWithoutHeaderFooter(t *testing.T) {
 	err = os.RemoveAll(dirPath)
 	assert.Nil(t, err)
 }
+
+func TestMarkdownWebhook(t *testing.T) {
+	c := &Client{Hostname: "http://localhost:3000"}
+	req, err := NewMarkdownRequest(
+		test.MarkdownTestFilePath(t, "index.html"),
+		test.MarkdownTestFilePath(t, "paragraph1.md"),
+		test.MarkdownTestFilePath(t, "paragraph2.md"),
+		test.MarkdownTestFilePath(t, "paragraph3.md"),
+	)
+	require.Nil(t, err)
+	req.WebhookURL("https://google.com")
+	req.WebhookURLTimeout(5.0)
+	req.AddWebhookURLHTTPHeader("A-Header", "Foo")
+	resp, err := c.Post(req)
+	assert.Nil(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+}

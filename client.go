@@ -55,7 +55,7 @@ func (req *request) ResultFilename(filename string) {
 	req.values[resultFilename] = filename
 }
 
-// WaitTiemout sets waitTimeout form field.
+// WaitTimeout sets waitTimeout form field.
 func (req *request) WaitTimeout(timeout float64) {
 	req.values[waitTimeout] = strconv.FormatFloat(timeout, 'f', 2, 64)
 }
