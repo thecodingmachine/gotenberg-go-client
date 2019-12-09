@@ -14,7 +14,8 @@ USER root
 # | Libraries used in the build process of this image.
 # |
 
-RUN apt-get install -y git gcc
+RUN apt-get update &&\
+    apt-get install -y git gcc
 
 # |--------------------------------------------------------------------------
 # | Golang
@@ -37,6 +38,10 @@ ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 # |
 # | Last instructions of this build.
 # |
+
+ARG GOTENBERG_LOG_LEVEL
+
+ENV LOG_LEVEL=${GOTENBERG_LOG_LEVEL}
 
 # Define our workding outside of $GOPATH (we're using go modules).
 WORKDIR /tests

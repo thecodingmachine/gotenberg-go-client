@@ -1,5 +1,6 @@
 GOLANG_VERSION=1.13
-GOTENBERG_VERSION=6.0.1
+GOTENBERG_VERSION=6
+GOTENBERG_LOG_LEVEL=DEBUG
 VERSION=snapshot
 GOLANGCI_LINT_VERSION=1.20.1
 
@@ -15,5 +16,5 @@ lint:
 
 # run all tests.
 tests:
-	docker build --build-arg GOLANG_VERSION=$(GOLANG_VERSION) --build-arg GOTENBERG_VERSION=$(GOTENBERG_VERSION)  -t thecodingmachine/gotenberg-go-client:tests -f build/tests/Dockerfile .
+	docker build --build-arg GOLANG_VERSION=$(GOLANG_VERSION) --build-arg GOTENBERG_VERSION=$(GOTENBERG_VERSION) --build-arg GOTENBERG_LOG_LEVEL=$(GOTENBERG_LOG_LEVEL) -t thecodingmachine/gotenberg-go-client:tests -f build/tests/Dockerfile .
 	docker run --rm -it -v "$(PWD):/tests" thecodingmachine/gotenberg-go-client:tests
