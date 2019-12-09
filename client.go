@@ -14,10 +14,11 @@ import (
 )
 
 const (
-	resultFilename    string = "resultFilename"
-	waitTimeout       string = "waitTimeout"
-	webhookURL        string = "webhookURL"
-	webhookURLTimeout string = "webhookURLTimeout"
+	resultFilename              string = "resultFilename"
+	waitTimeout                 string = "waitTimeout"
+	webhookURL                  string = "webhookURL"
+	webhookURLTimeout           string = "webhookURLTimeout"
+	webhookURLBaseHTTPHeaderKey string = "Gotenberg-Webhookurl-"
 )
 
 // Client facilitates interacting with
@@ -32,17 +33,20 @@ type Client struct {
 // the Gotenberg API.
 type Request interface {
 	postURL() string
+	customHTTPHeaders() map[string]string
 	formValues() map[string]string
 	formFiles() map[string]string
 }
 
 type request struct {
-	values map[string]string
+	httpHeaders map[string]string
+	values      map[string]string
 }
 
 func newRequest() *request {
 	return &request{
-		values: make(map[string]string),
+		httpHeaders: make(map[string]string),
+		values:      make(map[string]string),
 	}
 }
 
@@ -66,6 +70,16 @@ func (req *request) WebhookURLTimeout(timeout float64) {
 	req.values[webhookURLTimeout] = strconv.FormatFloat(timeout, 'f', 2, 64)
 }
 
+// AddWebhookURLHTTPHeader add a webhook custom HTTP header.
+func (req *request) AddWebhookURLHTTPHeader(key, value string) {
+	key = fmt.Sprintf("%s%s", webhookURLBaseHTTPHeaderKey, key)
+	req.httpHeaders[key] = value
+}
+
+func (req *request) customHTTPHeaders() map[string]string {
+	return req.httpHeaders
+}
+
 func (req *request) formValues() map[string]string {
 	return req.values
 }
@@ -81,7 +95,15 @@ func (c *Client) Post(req Request) (*http.Response, error) {
 		c.HTTPClient = &http.Client{}
 	}
 	URL := fmt.Sprintf("%s%s", c.Hostname, req.postURL())
-	resp, err := c.HTTPClient.Post(URL, contentType, body) /* #nosec */
+	httpReq, err := http.NewRequest(http.MethodPost, URL, body)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", contentType)
+	for key, value := range req.customHTTPHeaders() {
+		httpReq.Header.Set(key, value)
+	}
+	resp, err := c.HTTPClient.Do(httpReq) /* #nosec */
 	if err != nil {
 		return nil, err
 	}
