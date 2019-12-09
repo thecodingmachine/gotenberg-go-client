@@ -1,7 +1,7 @@
 GOLANG_VERSION=1.13
 GOTENBERG_VERSION=6.0.1
 VERSION=snapshot
-GOLANGCI_LINT_VERSION=1.19.1
+GOLANGCI_LINT_VERSION=1.20.1
 
 # gofmt and goimports all go files.
 fmt:
