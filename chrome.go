@@ -14,6 +14,7 @@ const (
 	marginLeft                 string = "marginLeft"
 	marginRight                string = "marginRight"
 	landscapeChrome            string = "landscape"
+	pageRanges                 string = "pageRanges"
 	googleChromeRpccBufferSize string = "googleChromeRpccBufferSize"
 )
 
@@ -89,6 +90,11 @@ func (req *chromeRequest) Margins(margins [4]float64) {
 // Landscape sets landscape form field.
 func (req *chromeRequest) Landscape(isLandscape bool) {
 	req.values[landscapeChrome] = strconv.FormatBool(isLandscape)
+}
+
+// PageRanges sets pageRanges form field.
+func (req *chromeRequest) PageRanges(ranges string) {
+	req.values[pageRanges] = ranges
 }
 
 // GoogleChromeRpccBufferSize sets googleChromeRpccBufferSize form field.

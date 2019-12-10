@@ -50,6 +50,15 @@ func TestURLComplete(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestURLPageRanges(t *testing.T) {
+	c := &Client{Hostname: "http://localhost:3000"}
+	req := NewURLRequest("http://google.com")
+	req.PageRanges("1-1")
+	resp, err := c.Post(req)
+	assert.Nil(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+}
+
 func TestURLWebhook(t *testing.T) {
 	c := &Client{Hostname: "http://localhost:3000"}
 	req := NewURLRequest("http://google.com")

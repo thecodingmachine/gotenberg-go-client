@@ -28,6 +28,17 @@ func TestOffice(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestOfficePageRanges(t *testing.T) {
+	c := &Client{Hostname: "http://localhost:3000"}
+	doc, err := NewDocumentFromPath("document.docx", test.OfficeTestFilePath(t, "document.docx"))
+	require.Nil(t, err)
+	req := NewOfficeRequest(doc)
+	req.PageRanges("1-1")
+	resp, err := c.Post(req)
+	assert.Nil(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+}
+
 func TestOfficeWebhook(t *testing.T) {
 	c := &Client{Hostname: "http://localhost:3000"}
 	doc, err := NewDocumentFromPath("document.docx", test.OfficeTestFilePath(t, "document.docx"))

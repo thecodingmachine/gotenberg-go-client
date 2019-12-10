@@ -87,6 +87,17 @@ func TestHTMLComplete(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestHTMLPageRanges(t *testing.T) {
+	c := &Client{Hostname: "http://localhost:3000"}
+	index, err := NewDocumentFromPath("index.html", test.HTMLTestFilePath(t, "index.html"))
+	require.Nil(t, err)
+	req := NewHTMLRequest(index)
+	req.PageRanges("1-1")
+	resp, err := c.Post(req)
+	assert.Nil(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+}
+
 func TestHTMLWebhook(t *testing.T) {
 	c := &Client{Hostname: "http://localhost:3000"}
 	index, err := NewDocumentFromPath("index.html", test.HTMLTestFilePath(t, "index.html"))

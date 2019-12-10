@@ -4,7 +4,10 @@ import (
 	"strconv"
 )
 
-const landscapeOffice string = "landscape"
+const (
+	landscapeOffice  string = "landscape"
+	pageRangesOffice string = "pageRanges"
+)
 
 // OfficeRequest facilitates Office documents
 // conversion with the Gotenberg API.
@@ -22,6 +25,11 @@ func NewOfficeRequest(docs ...Document) *OfficeRequest {
 // Landscape sets landscape form field.
 func (req *OfficeRequest) Landscape(isLandscape bool) {
 	req.values[landscapeOffice] = strconv.FormatBool(isLandscape)
+}
+
+// PageRanges sets pageRanges form field.
+func (req *OfficeRequest) PageRanges(ranges string) {
+	req.values[pageRangesOffice] = ranges
 }
 
 func (req *OfficeRequest) postURL() string {

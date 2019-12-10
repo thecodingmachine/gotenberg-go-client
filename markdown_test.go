@@ -71,6 +71,23 @@ func TestMarkdownComplete(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestMarkdownPageRanges(t *testing.T) {
+	c := &Client{Hostname: "http://localhost:3000"}
+	index, err := NewDocumentFromPath("index.html", test.MarkdownTestFilePath(t, "index.html"))
+	require.Nil(t, err)
+	markdown1, err := NewDocumentFromPath("paragraph1.md", test.MarkdownTestFilePath(t, "paragraph1.md"))
+	require.Nil(t, err)
+	markdown2, err := NewDocumentFromPath("paragraph2.md", test.MarkdownTestFilePath(t, "paragraph2.md"))
+	require.Nil(t, err)
+	markdown3, err := NewDocumentFromPath("paragraph3.md", test.MarkdownTestFilePath(t, "paragraph3.md"))
+	require.Nil(t, err)
+	req := NewMarkdownRequest(index, markdown1, markdown2, markdown3)
+	req.PageRanges("1-1")
+	resp, err := c.Post(req)
+	assert.Nil(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+}
+
 func TestMarkdownWebhook(t *testing.T) {
 	c := &Client{Hostname: "http://localhost:3000"}
 	index, err := NewDocumentFromPath("index.html", test.MarkdownTestFilePath(t, "index.html"))
