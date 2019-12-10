@@ -1,6 +1,11 @@
 package gotenberg
 
-const remoteURL string = "remoteURL"
+import "fmt"
+
+const (
+	remoteURL                  string = "remoteURL"
+	remoteURLBaseHTTPHeaderKey string = "Gotenberg-Remoteurl-"
+)
 
 // URLRequest facilitates remote URL conversion
 // with the Gotenberg API.
@@ -17,6 +22,12 @@ func NewURLRequest(url string) *URLRequest {
 
 func (url *URLRequest) postURL() string {
 	return "/convert/url"
+}
+
+// AddRemoteURLHTTPHeader add a remote URL custom HTTP header.
+func (url *URLRequest) AddRemoteURLHTTPHeader(key, value string) {
+	key = fmt.Sprintf("%s%s", remoteURLBaseHTTPHeaderKey, key)
+	url.httpHeaders[key] = value
 }
 
 // Compile-time checks to ensure type implements desired interfaces.

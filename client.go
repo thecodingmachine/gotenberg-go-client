@@ -14,16 +14,18 @@ import (
 )
 
 const (
-	resultFilename    string = "resultFilename"
-	waitTimeout       string = "waitTimeout"
-	webhookURL        string = "webhookURL"
-	webhookURLTimeout string = "webhookURLTimeout"
+	resultFilename              string = "resultFilename"
+	waitTimeout                 string = "waitTimeout"
+	webhookURL                  string = "webhookURL"
+	webhookURLTimeout           string = "webhookURLTimeout"
+	webhookURLBaseHTTPHeaderKey string = "Gotenberg-Webhookurl-"
 )
 
 // Client facilitates interacting with
 // the Gotenberg API.
 type Client struct {
-	Hostname string
+	Hostname   string
+	HTTPClient *http.Client
 }
 
 // Request is a type for sending
@@ -31,17 +33,20 @@ type Client struct {
 // the Gotenberg API.
 type Request interface {
 	postURL() string
+	customHTTPHeaders() map[string]string
 	formValues() map[string]string
-	formFiles() map[string]string
+	formFiles() map[string]Document
 }
 
 type request struct {
-	values map[string]string
+	httpHeaders map[string]string
+	values      map[string]string
 }
 
 func newRequest() *request {
 	return &request{
-		values: make(map[string]string),
+		httpHeaders: make(map[string]string),
+		values:      make(map[string]string),
 	}
 }
 
@@ -50,7 +55,7 @@ func (req *request) ResultFilename(filename string) {
 	req.values[resultFilename] = filename
 }
 
-// WaitTiemout sets waitTimeout form field.
+// WaitTimeout sets waitTimeout form field.
 func (req *request) WaitTimeout(timeout float64) {
 	req.values[waitTimeout] = strconv.FormatFloat(timeout, 'f', 2, 64)
 }
@@ -65,6 +70,16 @@ func (req *request) WebhookURLTimeout(timeout float64) {
 	req.values[webhookURLTimeout] = strconv.FormatFloat(timeout, 'f', 2, 64)
 }
 
+// AddWebhookURLHTTPHeader add a webhook custom HTTP header.
+func (req *request) AddWebhookURLHTTPHeader(key, value string) {
+	key = fmt.Sprintf("%s%s", webhookURLBaseHTTPHeaderKey, key)
+	req.httpHeaders[key] = value
+}
+
+func (req *request) customHTTPHeaders() map[string]string {
+	return req.httpHeaders
+}
+
 func (req *request) formValues() map[string]string {
 	return req.values
 }
@@ -76,8 +91,19 @@ func (c *Client) Post(req Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+	if c.HTTPClient == nil {
+		c.HTTPClient = &http.Client{}
+	}
 	URL := fmt.Sprintf("%s%s", c.Hostname, req.postURL())
-	resp, err := http.Post(URL, contentType, body) /* #nosec */
+	httpReq, err := http.NewRequest(http.MethodPost, URL, body)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", contentType)
+	for key, value := range req.customHTTPHeaders() {
+		httpReq.Header.Set(key, value)
+	}
+	resp, err := c.HTTPClient.Do(httpReq) /* #nosec */
 	if err != nil {
 		return nil, err
 	}
@@ -138,14 +164,10 @@ func multipartForm(req Request) (*bytes.Buffer, string, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	defer writer.Close() // nolint: errcheck
-	for filename, fpath := range req.formFiles() {
-		// https://github.com/thecodingmachine/gotenberg-go-client/issues/3
-		if fpath == "" {
-			continue
-		}
-		in, err := os.Open(fpath)
+	for filename, document := range req.formFiles() {
+		in, err := document.Reader()
 		if err != nil {
-			return nil, "", fmt.Errorf("%s: opening file: %v", filename, err)
+			return nil, "", fmt.Errorf("%s: creating reader: %v", filename, err)
 		}
 		defer in.Close() // nolint: errcheck
 		part, err := writer.CreateFormFile("files", filename)
@@ -154,7 +176,7 @@ func multipartForm(req Request) (*bytes.Buffer, string, error) {
 		}
 		_, err = io.Copy(part, in)
 		if err != nil {
-			return nil, "", fmt.Errorf("%s: copying file: %v", filename, err)
+			return nil, "", fmt.Errorf("%s: copying data: %v", filename, err)
 		}
 	}
 	for name, value := range req.formValues() {

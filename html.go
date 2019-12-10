@@ -1,49 +1,33 @@
 package gotenberg
 
-import (
-	"fmt"
-	"path/filepath"
-)
-
 // HTMLRequest facilitates HTML conversion
 // with the Gotenberg API.
 type HTMLRequest struct {
-	indexFilePath  string
-	assetFilePaths []string
+	index  Document
+	assets []Document
 
 	*chromeRequest
 }
 
 // NewHTMLRequest create HTMLRequest.
-func NewHTMLRequest(indexFilePath string) (*HTMLRequest, error) {
-	if !fileExists(indexFilePath) {
-		return nil, fmt.Errorf("%s: index file does not exist", indexFilePath)
-	}
-	return &HTMLRequest{indexFilePath, nil, newChromeRequest()}, nil
+func NewHTMLRequest(index Document) *HTMLRequest {
+	return &HTMLRequest{index, []Document{}, newChromeRequest()}
 }
 
 // Assets sets assets form files.
-func (req *HTMLRequest) Assets(fpaths ...string) error {
-	for _, fpath := range fpaths {
-		if !fileExists(fpath) {
-			return fmt.Errorf("%s: file does not exist", fpath)
-		}
-	}
-	req.assetFilePaths = fpaths
-	return nil
+func (req *HTMLRequest) Assets(assets ...Document) {
+	req.assets = assets
 }
 
 func (req *HTMLRequest) postURL() string {
 	return "/convert/html"
 }
 
-func (req *HTMLRequest) formFiles() map[string]string {
-	files := make(map[string]string)
-	files["index.html"] = req.indexFilePath
-	files["header.html"] = req.headerFilePath
-	files["footer.html"] = req.footerFilePath
-	for _, fpath := range req.assetFilePaths {
-		files[filepath.Base(fpath)] = fpath
+func (req *HTMLRequest) formFiles() map[string]Document {
+	files := make(map[string]Document)
+	files["index.html"] = req.index
+	for _, asset := range req.assets {
+		files[asset.Filename()] = asset
 	}
 	return files
 }
