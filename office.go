@@ -1,8 +1,6 @@
 package gotenberg
 
 import (
-	"fmt"
-	"path/filepath"
 	"strconv"
 )
 
@@ -11,19 +9,14 @@ const landscapeOffice string = "landscape"
 // OfficeRequest facilitates Office documents
 // conversion with the Gotenberg API.
 type OfficeRequest struct {
-	filePaths []string
+	docs []Document
 
 	*request
 }
 
 // NewOfficeRequest create OfficeRequest.
-func NewOfficeRequest(fpaths ...string) (*OfficeRequest, error) {
-	for _, fpath := range fpaths {
-		if !fileExists(fpath) {
-			return nil, fmt.Errorf("%s: file does not exist", fpath)
-		}
-	}
-	return &OfficeRequest{fpaths, newRequest()}, nil
+func NewOfficeRequest(docs ...Document) *OfficeRequest {
+	return &OfficeRequest{docs, newRequest()}
 }
 
 // Landscape sets landscape form field.
@@ -35,10 +28,10 @@ func (req *OfficeRequest) postURL() string {
 	return "/convert/office"
 }
 
-func (req *OfficeRequest) formFiles() map[string]string {
-	files := make(map[string]string)
-	for _, fpath := range req.filePaths {
-		files[filepath.Base(fpath)] = fpath
+func (req *OfficeRequest) formFiles() map[string]Document {
+	files := make(map[string]Document)
+	for _, doc := range req.docs {
+		files[doc.Filename()] = doc
 	}
 	return files
 }

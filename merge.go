@@ -1,36 +1,26 @@
 package gotenberg
 
-import (
-	"fmt"
-	"path/filepath"
-)
-
 // MergeRequest facilitates merging PDF
 // with the Gotenberg API.
 type MergeRequest struct {
-	filePaths []string
+	pdfs []Document
 
 	*request
 }
 
 // NewMergeRequest create MergeRequest.
-func NewMergeRequest(fpaths ...string) (*MergeRequest, error) {
-	for _, fpath := range fpaths {
-		if !fileExists(fpath) {
-			return nil, fmt.Errorf("%s: file does not exist", fpath)
-		}
-	}
-	return &MergeRequest{fpaths, newRequest()}, nil
+func NewMergeRequest(pdfs ...Document) *MergeRequest {
+	return &MergeRequest{pdfs, newRequest()}
 }
 
 func (req *MergeRequest) postURL() string {
 	return "/merge"
 }
 
-func (req *MergeRequest) formFiles() map[string]string {
-	files := make(map[string]string)
-	for _, fpath := range req.filePaths {
-		files[filepath.Base(fpath)] = fpath
+func (req *MergeRequest) formFiles() map[string]Document {
+	files := make(map[string]Document)
+	for _, pdf := range req.pdfs {
+		files[pdf.Filename()] = pdf
 	}
 	return files
 }

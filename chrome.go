@@ -46,14 +46,14 @@ var (
 )
 
 type chromeRequest struct {
-	headerFilePath string
-	footerFilePath string
+	header Document
+	footer Document
 
 	*request
 }
 
 func newChromeRequest() *chromeRequest {
-	return &chromeRequest{"", "", newRequest()}
+	return &chromeRequest{nil, nil, newRequest()}
 }
 
 // WaitDelay sets waitDelay form field.
@@ -62,21 +62,13 @@ func (req *chromeRequest) WaitDelay(delay float64) {
 }
 
 // Header sets header form file.
-func (req *chromeRequest) Header(fpath string) error {
-	if !fileExists(fpath) {
-		return fmt.Errorf("%s: header file does not exist", fpath)
-	}
-	req.headerFilePath = fpath
-	return nil
+func (req *chromeRequest) Header(header Document) {
+	req.header = header
 }
 
 // Footer sets footer form file.
-func (req *chromeRequest) Footer(fpath string) error {
-	if !fileExists(fpath) {
-		return fmt.Errorf("%s: footer file does not exist", fpath)
-	}
-	req.footerFilePath = fpath
-	return nil
+func (req *chromeRequest) Footer(footer Document) {
+	req.footer = footer
 }
 
 // PaperSize sets paperWidth and paperHeight form fields.
@@ -104,9 +96,13 @@ func (req *chromeRequest) GoogleChromeRpccBufferSize(bufferSize int64) {
 	req.values[googleChromeRpccBufferSize] = strconv.FormatInt(bufferSize, 10)
 }
 
-func (req *chromeRequest) formFiles() map[string]string {
-	files := make(map[string]string)
-	files["header.html"] = req.headerFilePath
-	files["footer.html"] = req.footerFilePath
+func (req *chromeRequest) formFiles() map[string]Document {
+	files := make(map[string]Document)
+	if req.header != nil {
+		files["header.html"] = req.header
+	}
+	if req.footer != nil {
+		files["footer.html"] = req.footer
+	}
 	return files
 }

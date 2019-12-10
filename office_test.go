@@ -7,13 +7,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/thecodingmachine/gotenberg-go-client/v6/test"
+	"github.com/thecodingmachine/gotenberg-go-client/v7/test"
 )
 
 func TestOffice(t *testing.T) {
 	c := &Client{Hostname: "http://localhost:3000"}
-	req, err := NewOfficeRequest(test.OfficeTestFilePath(t, "document.docx"))
+	doc, err := NewDocumentFromPath("document.docx", test.OfficeTestFilePath(t, "document.docx"))
 	require.Nil(t, err)
+	req := NewOfficeRequest(doc)
 	req.ResultFilename("foo.pdf")
 	req.WaitTimeout(5)
 	req.Landscape(false)
@@ -29,8 +30,9 @@ func TestOffice(t *testing.T) {
 
 func TestOfficeWebhook(t *testing.T) {
 	c := &Client{Hostname: "http://localhost:3000"}
-	req, err := NewOfficeRequest(test.OfficeTestFilePath(t, "document.docx"))
+	doc, err := NewDocumentFromPath("document.docx", test.OfficeTestFilePath(t, "document.docx"))
 	require.Nil(t, err)
+	req := NewOfficeRequest(doc)
 	req.WebhookURL("https://google.com")
 	req.WebhookURLTimeout(5.0)
 	req.AddWebhookURLHTTPHeader("A-Header", "Foo")

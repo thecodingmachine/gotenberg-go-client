@@ -1,8 +1,5 @@
-module github.com/thecodingmachine/gotenberg-go-client/v6
+module github.com/thecodingmachine/gotenberg-go-client/v7
 
 go 1.13
 
-require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/stretchr/testify v1.3.0
-)
+require github.com/stretchr/testify v1.3.0

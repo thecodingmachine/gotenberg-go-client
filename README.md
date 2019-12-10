@@ -5,35 +5,56 @@ A simple Go client for interacting with a Gotenberg API.
 ## Install
 
 ```bash
-$ go get -u github.com/thecodingmachine/gotenberg-go-client/v6
+$ go get -u github.com/thecodingmachine/gotenberg-go-client/v7
 ```
 
 ## Usage
 
 ```golang
-import "github.com/thecodingmachine/gotenberg-go-client/v6"
+import (
+    "time"
+    "net/http"
 
-func main() {
-    // HTML conversion example.
-    c := &gotenberg.Client{Hostname: "http://localhost:3000"}
-    req, _ := gotenberg.NewHTMLRequest("index.html")
-    req.Header("header.html")
-    req.Footer("footer.html")
-    req.Assets(
-        "font.woff",
-        "img.gif",
-        "style.css",
-    )
-    req.PaperSize(gotenberg.A4)
-    req.Margins(gotenberg.NormalMargins)
-    req.Landscape(false)
-    dest := "foo.pdf"
-    c.Store(req, dest)
+    "github.com/thecodingmachine/gotenberg-go-client/v7"
+)
+
+// create the client.
+client := &gotenberg.Client{Hostname: "http://localhost:3000"}
+// ... or use your own *http.Client.
+httpClient := &http.Client{
+    Timeout: time.Duration(5) * time.Second,
 }
+client := &gotenberg.Client{Hostname: "http://localhost:3000", HTTPClient: httpClient}
+
+// prepare the files required for your conversion.
+
+// from a path.
+index, _ := gotenberg.NewDocumentFromPath("index.html", "/path/to/file")
+// ... or from a string.
+index, _ := gotenberg.NewDocumentFromString("index.html", "<html>Foo</html>")
+// ... or from bytes.
+index, _ := gotenberg.NewDocumentFromBytes("index.html", []byte("<html>Foo</html>"))
+
+header, _ := gotenberg.NewDocumentFromPath("header.html", "/path/to/file")
+footer, _ := gotenberg.NewDocumentFromPath("footer.html", "/path/to/file")
+style, _ := gotenberg.NewDocumentFromPath("style.css", "/path/to/file")
+img, _ := gotenberg.NewDocumentFromPath("img.png", "/path/to/file")
+
+req := gotenberg.NewHTMLRequest(index)
+req.Header(header)
+req.Footer(footer)
+req.Assets(style, img)
+req.PaperSize(gotenberg.A4)
+req.Margins(gotenberg.NoMargins)
+
+//store method allows you to... store the resulting PDF in a particular destination.
+client.Store(req, "path/you/want/the/pdf/to/be/stored.pdf")
+
+// if you wish to redirect the response directly to the browser, you may also use:
+resp, _ := client.Post(req)
 ```
 
 For more complete usages, head to the [documentation](https://thecodingmachine.github.io/gotenberg).
-
 
 ## Badges
 

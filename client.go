@@ -35,7 +35,7 @@ type Request interface {
 	postURL() string
 	customHTTPHeaders() map[string]string
 	formValues() map[string]string
-	formFiles() map[string]string
+	formFiles() map[string]Document
 }
 
 type request struct {
@@ -164,14 +164,10 @@ func multipartForm(req Request) (*bytes.Buffer, string, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	defer writer.Close() // nolint: errcheck
-	for filename, fpath := range req.formFiles() {
-		// https://github.com/thecodingmachine/gotenberg-go-client/issues/3
-		if fpath == "" {
-			continue
-		}
-		in, err := os.Open(fpath)
+	for filename, document := range req.formFiles() {
+		in, err := document.Reader()
 		if err != nil {
-			return nil, "", fmt.Errorf("%s: opening file: %v", filename, err)
+			return nil, "", fmt.Errorf("%s: creating reader: %v", filename, err)
 		}
 		defer in.Close() // nolint: errcheck
 		part, err := writer.CreateFormFile("files", filename)
@@ -180,7 +176,7 @@ func multipartForm(req Request) (*bytes.Buffer, string, error) {
 		}
 		_, err = io.Copy(part, in)
 		if err != nil {
-			return nil, "", fmt.Errorf("%s: copying file: %v", filename, err)
+			return nil, "", fmt.Errorf("%s: copying data: %v", filename, err)
 		}
 	}
 	for name, value := range req.formValues() {
