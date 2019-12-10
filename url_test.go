@@ -39,6 +39,7 @@ func TestURLComplete(t *testing.T) {
 	req.Margins(NormalMargins)
 	req.Landscape(false)
 	req.GoogleChromeRpccBufferSize(1048576)
+	req.AddRemoteURLHTTPHeader("A-Header", "Foo")
 	dirPath, err := test.Rand()
 	require.Nil(t, err)
 	dest := fmt.Sprintf("%s/foo.pdf", dirPath)
