@@ -26,6 +26,8 @@ func (req *HTMLRequest) postURL() string {
 func (req *HTMLRequest) formFiles() map[string]Document {
 	files := make(map[string]Document)
 	files["index.html"] = req.index
+	files["footer.html"] = req.footer
+	files["header.html"] = req.header
 	for _, asset := range req.assets {
 		files[asset.Filename()] = asset
 	}

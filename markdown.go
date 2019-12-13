@@ -27,6 +27,8 @@ func (req *MarkdownRequest) postURL() string {
 func (req *MarkdownRequest) formFiles() map[string]Document {
 	files := make(map[string]Document)
 	files["index.html"] = req.index
+	files["footer.html"] = req.footer
+	files["header.html"] = req.header
 	for _, markdown := range req.markdowns {
 		files[markdown.Filename()] = markdown
 	}
