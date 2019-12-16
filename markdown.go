@@ -30,6 +30,12 @@ func (req *MarkdownRequest) formFiles() map[string]Document {
 	for _, markdown := range req.markdowns {
 		files[markdown.Filename()] = markdown
 	}
+	if req.header != nil {
+		files["header.html"] = req.header
+	}
+	if req.footer != nil {
+		files["footer.html"] = req.footer
+	}
 	for _, asset := range req.assets {
 		files[asset.Filename()] = asset
 	}

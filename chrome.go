@@ -101,14 +101,3 @@ func (req *chromeRequest) PageRanges(ranges string) {
 func (req *chromeRequest) GoogleChromeRpccBufferSize(bufferSize int64) {
 	req.values[googleChromeRpccBufferSize] = strconv.FormatInt(bufferSize, 10)
 }
-
-func (req *chromeRequest) formFiles() map[string]Document {
-	files := make(map[string]Document)
-	if req.header != nil {
-		files["header.html"] = req.header
-	}
-	if req.footer != nil {
-		files["footer.html"] = req.footer
-	}
-	return files
-}

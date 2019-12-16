@@ -20,14 +20,25 @@ func NewURLRequest(url string) *URLRequest {
 	return req
 }
 
-func (url *URLRequest) postURL() string {
+func (req *URLRequest) postURL() string {
 	return "/convert/url"
 }
 
 // AddRemoteURLHTTPHeader add a remote URL custom HTTP header.
-func (url *URLRequest) AddRemoteURLHTTPHeader(key, value string) {
+func (req *URLRequest) AddRemoteURLHTTPHeader(key, value string) {
 	key = fmt.Sprintf("%s%s", remoteURLBaseHTTPHeaderKey, key)
-	url.httpHeaders[key] = value
+	req.httpHeaders[key] = value
+}
+
+func (req *URLRequest) formFiles() map[string]Document {
+	files := make(map[string]Document)
+	if req.header != nil {
+		files["header.html"] = req.header
+	}
+	if req.footer != nil {
+		files["footer.html"] = req.footer
+	}
+	return files
 }
 
 // Compile-time checks to ensure type implements desired interfaces.
