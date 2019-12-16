@@ -47,7 +47,7 @@ req.Assets(style, img)
 req.PaperSize(gotenberg.A4)
 req.Margins(gotenberg.NoMargins)
 
-//store method allows you to... store the resulting PDF in a particular destination.
+// store method allows you to... store the resulting PDF in a particular destination.
 client.Store(req, "path/you/want/the/pdf/to/be/stored.pdf")
 
 // if you wish to redirect the response directly to the browser, you may also use:
