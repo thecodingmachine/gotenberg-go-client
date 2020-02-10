@@ -77,6 +77,7 @@ func TestHTMLComplete(t *testing.T) {
 	req.Margins(NormalMargins)
 	req.Landscape(false)
 	req.GoogleChromeRpccBufferSize(1048576)
+	req.Scale(1.5)
 	dirPath, err := test.Rand()
 	require.Nil(t, err)
 	dest := fmt.Sprintf("%s/foo.pdf", dirPath)

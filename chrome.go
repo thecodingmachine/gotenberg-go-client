@@ -16,6 +16,7 @@ const (
 	landscapeChrome            string = "landscape"
 	pageRanges                 string = "pageRanges"
 	googleChromeRpccBufferSize string = "googleChromeRpccBufferSize"
+	scale                      string = "scale"
 )
 
 // nolint: gochecknoglobals
@@ -100,4 +101,9 @@ func (req *chromeRequest) PageRanges(ranges string) {
 // GoogleChromeRpccBufferSize sets googleChromeRpccBufferSize form field.
 func (req *chromeRequest) GoogleChromeRpccBufferSize(bufferSize int64) {
 	req.values[googleChromeRpccBufferSize] = strconv.FormatInt(bufferSize, 10)
+}
+
+// Scale sets scale form field
+func (req *chromeRequest) Scale(scaleFactor float64) {
+	req.values[scale] = fmt.Sprintf("%f", scaleFactor)
 }
