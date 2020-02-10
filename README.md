@@ -4,8 +4,10 @@ A simple Go client for interacting with a Gotenberg API.
 
 ## Install
 
+Proceed with Go modules by adding
+
 ```bash
-$ go get -u github.com/thecodingmachine/gotenberg-go-client/v7
+require github.com/thecodingmachine/gotenberg-go-client/v7 v7.1.0
 ```
 
 ## Usage
