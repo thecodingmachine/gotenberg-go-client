@@ -110,21 +110,42 @@ func (c *Client) Post(req Request) (*http.Response, error) {
 	return resp, nil
 }
 
-// Store creates the resulting PDF to given destination.
-func (c *Client) Store(req Request, dest string) error {
+func (c *Client) makeRequest(req Request) (*bytes.Buffer, error) {
 	if hasWebhook(req) {
-		return errors.New("cannot use Store method with a webhook")
+		return nil, errors.New("cannot use Store method with a webhook")
 	}
 	resp, err := c.Post(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("failed to generate the result PDF")
+		return nil, errors.New("failed to generate the result PDF")
 	}
-	return writeNewFile(dest, resp.Body)
+
+	buff := bytes.NewBuffer(nil)
+	_, err = io.Copy(buff, resp.Body)
+	return buff, err
+}
+
+// Store creates the resulting PDF to given destination.
+func (c *Client) Store(req Request, dest string) error {
+	data, err := c.makeRequest(req)
+	if err != nil {
+		return err
+	}
+	return writeNewFile(dest, data)
+}
+
+// StoreToWriter creates the resulting PDF to a io writer
+func (c *Client) StoreToWriter(req Request, w io.Writer) error {
+	data, err := c.makeRequest(req)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(w, data)
+	return err
 }
 
 func hasWebhook(req Request) bool {
