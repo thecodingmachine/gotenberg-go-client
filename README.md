@@ -55,7 +55,7 @@ client.Store(req, "path/you/want/the/pdf/to/be/stored.pdf")
 resp, _ := client.Post(req)
 ```
 
-For more complete usages, head to the [documentation](https://thecodingmachine.github.io/gotenberg).
+For more complete usages, head to the [documentation](https://gotenberg.dev/).
 
 ## Badges
 
