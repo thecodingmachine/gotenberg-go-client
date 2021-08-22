@@ -1,3 +1,5 @@
+**⚠️ Not working for Gotenberg >= 7 ⚠️** 
+
 # Gotenberg Go client
 
 A simple Go client for interacting with a Gotenberg API.
