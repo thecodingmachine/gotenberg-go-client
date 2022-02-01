@@ -135,8 +135,8 @@ func (c *Client) StoreContext(ctx context.Context, req Request, dest string) err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return errors.New("failed to generate the result PDF")
+	if resp.StatusCode >= http.StatusBadRequest {
+		return fmt.Errorf("failed to generate the result PDF - http status code: [%d]", resp.StatusCode) // more details here now!
 	}
 	return writeNewFile(dest, resp.Body)
 }
