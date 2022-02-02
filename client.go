@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"log"
 )
 
 const (
@@ -135,9 +136,14 @@ func (c *Client) StoreContext(ctx context.Context, req Request, dest string) err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return errors.New("failed to generate the result PDF")
+	if resp.StatusCode >= http.StatusBadRequest {
+		return fmt.Errorf("failed to generate the result PDF - http status code: [%d]", resp.StatusCode) // more details here now!
 	}
+	
+        if resp.StatusCode < http.StatusOK {
+		return log.Printf("http status code: [%d]") // maybe the gotenburg server is still processing the request etc - this could be passed through as a bool maybe.
+	}
+	
 	return writeNewFile(dest, resp.Body)
 }
 
