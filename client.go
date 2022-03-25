@@ -120,8 +120,8 @@ func (c *Client) makeRequest(req Request) (*bytes.Buffer, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("failed to generate the result PDF")
+	if resp.StatusCode >= http.StatusBadRequest {
+		return nil, fmt.Errorf("failed to generate the result PDF - http status code: %d", resp.StatusCode)
 	}
 
 	buff := bytes.NewBuffer(nil)
