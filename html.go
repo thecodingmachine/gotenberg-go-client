@@ -20,7 +20,7 @@ func (req *HTMLRequest) Assets(assets ...Document) {
 }
 
 func (req *HTMLRequest) postURL() string {
-	return "/convert/html"
+	return "/forms/chromium/convert/html"
 }
 
 func (req *HTMLRequest) formFiles() map[string]Document {
