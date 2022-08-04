@@ -2,6 +2,7 @@ package gotenberg
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -87,6 +88,13 @@ func (req *request) formValues() map[string]string {
 // Post sends a request to the Gotenberg API
 // and returns the response.
 func (c *Client) Post(req Request) (*http.Response, error) {
+	return c.PostContext(context.Background(), req)
+}
+
+// PostContext sends a request to the Gotenberg API
+// and returns the response.
+// The created HTTP request can be canceled by the passed context.
+func (c *Client) PostContext(ctx context.Context, req Request) (*http.Response, error) {
 	body, contentType, err := multipartForm(req)
 	if err != nil {
 		return nil, err
@@ -95,7 +103,7 @@ func (c *Client) Post(req Request) (*http.Response, error) {
 		c.HTTPClient = &http.Client{}
 	}
 	URL := fmt.Sprintf("%s%s", c.Hostname, req.postURL())
-	httpReq, err := http.NewRequest(http.MethodPost, URL, body)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, URL, body)
 	if err != nil {
 		return nil, err
 	}
@@ -110,11 +118,11 @@ func (c *Client) Post(req Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func (c *Client) makeRequest(req Request) (*bytes.Buffer, error) {
+func (c *Client) makeRequest(ctx context.Context, req Request) (*bytes.Buffer, error) {
 	if hasWebhook(req) {
 		return nil, errors.New("cannot use Store method with a webhook")
 	}
-	resp, err := c.Post(req)
+	resp, err := c.PostContext(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +139,7 @@ func (c *Client) makeRequest(req Request) (*bytes.Buffer, error) {
 
 // Store creates the resulting PDF to given destination.
 func (c *Client) Store(req Request, dest string) error {
-	data, err := c.makeRequest(req)
+	data, err := c.makeRequest(context.Background(), req)
 	if err != nil {
 		return err
 	}
@@ -140,7 +148,7 @@ func (c *Client) Store(req Request, dest string) error {
 
 // StoreToWriter creates the resulting PDF to a io writer
 func (c *Client) StoreToWriter(req Request, w io.Writer) error {
-	data, err := c.makeRequest(req)
+	data, err := c.makeRequest(context.Background(), req)
 	if err != nil {
 		return err
 	}
