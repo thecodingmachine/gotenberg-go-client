@@ -33,7 +33,7 @@ func (req *OfficeRequest) PageRanges(ranges string) {
 }
 
 func (req *OfficeRequest) postURL() string {
-	return "/convert/office"
+	return "/forms/libreoffice/convert"
 }
 
 func (req *OfficeRequest) formFiles() map[string]Document {
