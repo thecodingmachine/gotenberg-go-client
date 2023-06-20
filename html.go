@@ -3,15 +3,19 @@ package gotenberg
 // HTMLRequest facilitates HTML conversion
 // with the Gotenberg API.
 type HTMLRequest struct {
-	index  Document
-	assets []Document
-
+	index    Document
+	assets   []Document
+	endpoint string
 	*chromeRequest
 }
 
 // NewHTMLRequest create HTMLRequest.
 func NewHTMLRequest(index Document) *HTMLRequest {
-	return &HTMLRequest{index, []Document{}, newChromeRequest()}
+	return &HTMLRequest{index, []Document{}, "/convert/html", newChromeRequest()}
+}
+
+func (req *HTMLRequest) SetEndpoint(endpoint string) {
+	req.endpoint = endpoint
 }
 
 // Assets sets assets form files.
@@ -20,7 +24,7 @@ func (req *HTMLRequest) Assets(assets ...Document) {
 }
 
 func (req *HTMLRequest) postURL() string {
-	return "/convert/html"
+	return req.endpoint
 }
 
 func (req *HTMLRequest) formFiles() map[string]Document {
